@@ -1,0 +1,6 @@
+{
+  "databaseURL": "https://UDIT-JAIN-s-workspace-selq67.us-east-1.xata.sh/db/loomClone",
+  "codegen": {
+    "output": "src/xata.ts"
+  }
+}
