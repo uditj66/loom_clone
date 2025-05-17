@@ -1,13 +1,8 @@
 import { toNextJsHandler } from "better-auth/next-js";
 import { auth } from "@/lib/auth";
 import aj from "@/lib/arcjet";
-import {
-  Arcjet,
-  ArcjetDecision,
-  slidingWindow,
-  validateEmail,
-} from "@arcjet/next";
-import { NextRequest, NextResponse } from "next/server";
+import { ArcjetDecision, slidingWindow, validateEmail } from "@arcjet/next";
+import { NextRequest } from "next/server";
 import ip from "@arcjet/ip";
 
 // Email validation -> block
@@ -21,8 +16,8 @@ const emailValidation = aj.withRule(
 const rateLimit = await aj.withRule(
   slidingWindow({
     mode: "LIVE",
-    interval: "2m",
-    max: 2,
+    interval: "1m",
+    max: 100,
     characteristics: ["fingerprint"],
   })
 );
