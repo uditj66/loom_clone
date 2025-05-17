@@ -24,7 +24,7 @@ const validate = aj.withRule(shield({ mode: "LIVE" })).withRule(
 export default createMiddleware(validate);
 export const config = {
   matcher: [
-    "/((?!api|_next|static|favicon.ico|sign-in|signup|register|public|assets).*)",
+    "/((?!api|_next|static|favicon.ico|sign-in|sign-out|register|public|assets).*)",
   ],
 
   //   Adrian Matcher

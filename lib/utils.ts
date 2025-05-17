@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ilike, sql } from "drizzle-orm";
-// import { videos } from "@/drizzle/schema";
+import { videos } from "@/drizzle/schema";
 import { DEFAULT_VIDEO_CONFIG, DEFAULT_RECORDING_CONFIG } from "@/constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -99,19 +99,19 @@ export const withErrorHandling = <T, A extends unknown[]>(
   };
 };
 
-// export const getOrderByClause = (filter?: string) => {
-//   switch (filter) {
-//     case "Most Viewed":
-//       return sql`${videos.views} DESC`;
-//     case "Least Viewed":
-//       return sql`${videos.views} ASC`;
-//     case "Oldest First":
-//       return sql`${videos.createdAt} ASC`;
-//     case "Most Recent":
-//     default:
-//       return sql`${videos.createdAt} DESC`;
-//   }
-// };
+export const getOrderByClause = (filter?: string) => {
+  switch (filter) {
+    case "Most Viewed":
+      return sql`${videos.views} DESC`;
+    case "Least Viewed":
+      return sql`${videos.views} ASC`;
+    case "Oldest First":
+      return sql`${videos.createdAt} ASC`;
+    case "Most Recent":
+    default:
+      return sql`${videos.createdAt} DESC`;
+  }
+};
 
 export const generatePagination = (currentPage: number, totalPages: number) => {
   if (totalPages <= 7) {
@@ -142,6 +142,7 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
   ];
 };
 
+//  SCREEN RECOEDING BASED FUNCTIONS
 export const getMediaStreams = async (
   withMic: boolean
 ): Promise<MediaStreams> => {
@@ -185,33 +186,6 @@ export const createAudioMixer = (
   return destination;
 };
 
-export const setupMediaRecorder = (stream: MediaStream) => {
-  try {
-    return new MediaRecorder(stream, DEFAULT_RECORDING_CONFIG);
-  } catch {
-    return new MediaRecorder(stream);
-  }
-};
-
-export const getVideoDuration = (url: string): Promise<number | null> =>
-  new Promise((resolve) => {
-    const video = document.createElement("video");
-    video.preload = "metadata";
-    video.onloadedmetadata = () => {
-      const duration =
-        isFinite(video.duration) && video.duration > 0
-          ? Math.round(video.duration)
-          : null;
-      URL.revokeObjectURL(video.src);
-      resolve(duration);
-    };
-    video.onerror = () => {
-      URL.revokeObjectURL(video.src);
-      resolve(null);
-    };
-    video.src = url;
-  });
-
 export const setupRecording = (
   stream: MediaStream,
   handlers: RecordingHandlers
@@ -247,6 +221,33 @@ export const createRecordingBlob = (
 
 export const calculateRecordingDuration = (startTime: number | null): number =>
   startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+
+export const setupMediaRecorder = (stream: MediaStream) => {
+  try {
+    return new MediaRecorder(stream, DEFAULT_RECORDING_CONFIG);
+  } catch {
+    return new MediaRecorder(stream);
+  }
+};
+
+export const getVideoDuration = (url: string): Promise<number | null> =>
+  new Promise((resolve) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      const duration =
+        isFinite(video.duration) && video.duration > 0
+          ? Math.round(video.duration)
+          : null;
+      URL.revokeObjectURL(video.src);
+      resolve(duration);
+    };
+    video.onerror = () => {
+      URL.revokeObjectURL(video.src);
+      resolve(null);
+    };
+    video.src = url;
+  });
 
 export function parseTranscript(transcript: string): TranscriptEntry[] {
   const lines = transcript.replace(/^WEBVTT\s*/, "").split("\n");
@@ -301,7 +302,7 @@ export function daysAgo(inputDate: Date): string {
 }
 
 export const createIframeLink = (videoId: string) =>
-  `https://iframe.mediadelivery.net/embed/421422/${videoId}?autoplay=true&preload=true`;
+  `https://iframe.mediadelivery.net/embed/425465/${videoId}?autoplay=true&preload=true`;
 
 export const doesTitleMatch = (videos: any, searchQuery: string) =>
   ilike(

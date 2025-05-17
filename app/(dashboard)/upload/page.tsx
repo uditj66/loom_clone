@@ -45,6 +45,40 @@ const page = () => {
       setVideoDuration(video.duration);
     }
   }, [video.duration]);
+
+  useEffect(() => {
+    const checkForRecordedVideo = async () => {
+      try {
+        const storedVideo = sessionStorage.getItem("recordedVideo");
+        if (!storedVideo) return;
+        const { url, name, type, duration } = JSON.parse(storedVideo);
+        const blob = await fetch(url).then((res) => res.blob());
+        const file = new File([blob], name, { type, lastModified: Date.now() });
+
+        //  upload video programatiocally to the video upload form
+
+        if (video.inputRef.current) {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          video.inputRef.current.files = dataTransfer.files;
+
+          const event = new Event("change", {
+            bubbles: true,
+          });
+          video.inputRef.current.dispatchEvent(event);
+          video.handleFileChange({
+            target: { files: dataTransfer.files },
+          } as ChangeEvent<HTMLInputElement>);
+        }
+        if (duration) setVideoDuration(duration);
+        sessionStorage.removeItem("recordedVideo");
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error(error, "error loading recorded video");
+      }
+    };
+    checkForRecordedVideo();
+  }, [video]);
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [name]: value }));
@@ -87,7 +121,7 @@ const page = () => {
         throw new Error("Failed to get thumbnail upload Credentials");
       }
 
-      // # Step-3 (Attach Thumbnail)
+      // # Step-3 (Upload Thumbnail to bunny)
       await uploadFileToBunny(
         thumbnail.file,
         thumbnailUploadUrl,
@@ -102,7 +136,7 @@ const page = () => {
         duration: videoDuration,
       });
 
-      router.push(`/video/${videoId}`);
+      router.push(`/`);
     } catch (error) {
       console.error("Error submitting form :", error);
     } finally {
@@ -168,7 +202,7 @@ const page = () => {
           onChange={handleInputChange}
         />
         <button className="submit-button" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Uplaoding" : "Upload a video"}
+          {isSubmitting ? "Uploading" : "Upload a video"}
         </button>
       </form>
     </div>

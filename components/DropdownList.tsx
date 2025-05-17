@@ -7,7 +7,6 @@ const DropdownList = () => {
   return (
     <div className="relative">
       <div className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-        dropdownlist
         <div className="filter-trigger">
           <figure>
             <Image
@@ -16,7 +15,7 @@ const DropdownList = () => {
               width={14}
               height={14}
             ></Image>
-           Most Recent
+            Most Recent
           </figure>
           <Image
             src={"/assets/icons/arrow-down.svg"}
@@ -28,7 +27,9 @@ const DropdownList = () => {
         {isOpen && (
           <ul className="dropdown">
             {["MOST RECENT", "MOSTLIKED"].map((option) => (
-              <li className="list-item" key={option}>{option}</li>
+              <li className="list-item" key={option}>
+                {option}
+              </li>
             ))}
           </ul>
         )}
