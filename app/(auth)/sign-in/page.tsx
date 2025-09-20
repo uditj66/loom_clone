@@ -19,12 +19,18 @@ const page = () => {
             alt="logo"
             width={32}
             height={32}
-          ></Image>
+          />
           <h1>SnapCast</h1>
         </Link>
         <div className="description">
           <section>
             <figure>
+              {/* Array.from({ length: 5 })
+              This creates an array of length 5.
+              The elements are empty (undefined), but the array has 5 "slots".
+              👉 Example: Array.from({ length: 5 }) results in [undefined, undefined, undefined, undefined, undefined].
+               */}
+
               {Array.from({ length: 5 }).map((_, index) => (
                 <Image
                   key={index}
@@ -36,8 +42,8 @@ const page = () => {
               ))}
             </figure>
             <p>
-              SnapCast makes screen recording easy.From quick walkthroughs to
-              full presentations ,it's fast,smooth and shareable in seconds
+              SnapCast makes screen recording easy . From quick walkthroughs to
+              full presentations, it's fast , smooth and shareable in seconds
             </p>
             <article>
               <Image
@@ -68,7 +74,8 @@ const page = () => {
             <h1>SnapCast</h1>
           </Link>
           <p>
-            Create and share your first <span>SNAPCAST</span> video in no time
+            Say <span>hello ! </span> with <span>SNAPCAST</span> and share first
+            in no time
           </p>
           <button onClick={handleSignIn}>
             <Image

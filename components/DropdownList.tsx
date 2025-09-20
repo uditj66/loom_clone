@@ -21,19 +21,19 @@ const DropdownList = () => {
             src={"/assets/icons/arrow-down.svg"}
             width={20}
             height={20}
-            alt="arrow"
-          ></Image>
+            alt="arrow-down"
+          />
         </div>
-        {isOpen && (
-          <ul className="dropdown">
-            {["MOST RECENT", "MOSTLIKED"].map((option) => (
-              <li className="list-item" key={option}>
-                {option}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
+      {isOpen && (
+        <ul className="dropdown">
+          {["MOST RECENT", "MOSTLIKED"].map((option) => (
+            <li className="list-item" key={option}>
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

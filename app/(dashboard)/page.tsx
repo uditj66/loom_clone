@@ -38,16 +38,16 @@ const Page = async ({ searchParams }: SearchParams) => {
         />
       )}
       {/* <VideoCard
-          id="1"
-          title="SnapchatMessage"
-          createdAt={new Date(Date.now())}
-          thumbnail="/assets/samples/thumbnail (1).png"
-          username="jason"
-          userImg="/assets/images/jason.png"
-          views={10}
-          visibility="public"
-          duration={156}
-        /> */}
+        id="1"
+        title="SnapchatMessage"
+        createdAt={new Date(2025,8,18,22,18,26)}
+        thumbnail="/assets/samples/thumbnail (1).png"
+        username="jason"
+        userImg="/assets/images/jason.png"
+        views={10}
+        visibility="public"
+        duration={156}
+      /> */}
     </main>
   );
 };

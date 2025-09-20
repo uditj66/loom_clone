@@ -32,7 +32,7 @@ const VideoCard = ({
               alt="avatar"
               width={34}
               height={34}
-              className="rounded-full "
+              className="rounded-full aspect-square"
             ></Image>
             <figcaption>
               <h3>{username}</h3>
@@ -67,7 +67,7 @@ const VideoCard = ({
           alt="copy "
           width={18}
           height={18}
-        ></Image>{" "}
+        />
       </button>
       {duration && (
         <div className="duration">{Math.ceil(duration / 60)}min</div>

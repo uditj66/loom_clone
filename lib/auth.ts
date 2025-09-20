@@ -1,3 +1,5 @@
+// Hooking-Up all the stuff i.e Better-auth ,drizzle and Xata database
+// Better-auth provide cookies based sessions
 import { db } from "@/drizzle/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";

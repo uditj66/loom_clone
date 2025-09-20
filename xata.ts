@@ -7,8 +7,7 @@ export type DatabaseSchema = {};
 const DatabaseClient = buildClient();
 
 const defaultOptions = {
-  databaseURL:
-    "https://UDIT-JAIN-s-workspace-selq67.us-east-1.xata.sh/db/loomClone",
+  databaseURL: process.env.DATABASE_URL,
   apiKey: process.env.XATA_API_KEY,
   branch: "main",
 };
