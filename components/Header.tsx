@@ -36,7 +36,7 @@ const Header = ({ subHeader, title, userImg }: SharedHeaderProps) => {
             <span>Upload a Video</span>
           </Link>
           {/* later replaced with RecordScreen component */}
-          <div className="record">
+          {/* <div className="record">
             <button className="primary-btn">
               <Image
                 src={ICONS.record}
@@ -46,7 +46,7 @@ const Header = ({ subHeader, title, userImg }: SharedHeaderProps) => {
               ></Image>
               <span>Record a Video</span>
             </button>
-          </div>
+          </div> */}
 
           <RecordScreen />
         </aside>
