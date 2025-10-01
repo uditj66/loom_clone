@@ -29,9 +29,4 @@ export const config = {
   matcher: [
     "/((?!api|_next|static|favicon.ico|sign-in|sign-out|register|public|assets).*)",
   ],
-
-  //   Adrian Matcher
-  //   matcher: [
-  //     "/((?!api|_next/static|_next/image|favicon.ico|sign-in|assets).*)",
-  //   ]
 };
