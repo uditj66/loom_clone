@@ -9,7 +9,7 @@ const FormField = ({
   placeholder,
   onChange,
   as = "input",
-  options = [],
+  options,
 }: FormFieldProps) => {
   const InputToRender = ({ type }: { type: string }) => {};
   return (

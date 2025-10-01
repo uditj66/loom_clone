@@ -13,7 +13,7 @@ const Header = ({ subHeader, title, userImg }: SharedHeaderProps) => {
           {userImg && (
             <Image
               className="rounded-full"
-              src={userImg}
+              src={userImg || "/assets/images/dummy.jpg"}
               alt="user"
               width={66}
               height={66}
@@ -35,7 +35,8 @@ const Header = ({ subHeader, title, userImg }: SharedHeaderProps) => {
             ></Image>
             <span>Upload a Video</span>
           </Link>
-          {/* <div className="record">
+          {/* later replaced with RecordScreen component */}
+          <div className="record">
             <button className="primary-btn">
               <Image
                 src={ICONS.record}
@@ -45,7 +46,7 @@ const Header = ({ subHeader, title, userImg }: SharedHeaderProps) => {
               ></Image>
               <span>Record a Video</span>
             </button>
-          </div> */}
+          </div>
 
           <RecordScreen />
         </aside>
