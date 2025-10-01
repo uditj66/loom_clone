@@ -24,7 +24,11 @@ const FileInput = ({
         onChange={onChange}
       />
       {!previewUrl ? (
-        <figure onClick={() => inputRef.current?.click()}>
+        <figure
+          onClick={() => {
+            inputRef.current?.click();
+          }}
+        >
           <Image
             src={"/assets/icons/upload.svg"}
             alt="upload"

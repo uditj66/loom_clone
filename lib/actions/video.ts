@@ -24,16 +24,29 @@ const ACCESS_KEY = {
   streamAccessKey: getEnv("BUNNY_STREAM_ACCESS_KEY"),
   storageAccessKey: getEnv("BUNNY_STORAGE_ACCESS_KEY"),
 };
-// Helper function
-const getSessionUserId = async (): Promise<string> => {
+
+// Helper functions
+const getUserSessionId = async (): Promise<string> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("UNAUTHENTICATED");
   return session.user.id;
 };
+/*
+  Why we use it:
+
+1. In frameworks like Next.js, revalidatePath is used to re-generate or update the cached static pages for specific routes.
+
+2. If you have incremental static regeneration (ISR) enabled, your pages can be updated without redeploying the whole site.
+
+3. This function is just a helper to revalidate multiple paths at once, instead of calling revalidatePath separately for each path.
+
+*/
 const reValidatePaths = (paths: string[]) => {
-  paths.map((path) => revalidatePath(path));
+  paths.forEach((path) => revalidatePath(path));
 };
 
+// This is helper function that just build a Query so that if we want to use this query again then we don't need to write again .We directly use this query object and await it ,to really make an Db call.
+// This query object just join (user) table with (videos) table using LEFT JOIN and selects all column from videos table and id,name,image from user table.Main table is (videos) and (videos) table left joins with (user) table.
 const buildVideoWithUserQuery = () => {
   return db
     .select({
@@ -43,27 +56,32 @@ const buildVideoWithUserQuery = () => {
     .from(videos)
     .leftJoin(user, eq(videos.userId, user.id));
 };
-// arcjet rate limiting
-const validateWithArcjet = async (fingerprint: string) => {
+
+// Arcjet Rate limiting function -> Using as Server Actions which can be passed as prop to client components
+const validateWithArcjet = async (userId: string) => {
+  // aj.withRule returns an Augmented ArcjetNext client
   const rateLimit = aj.withRule(
     fixedWindow({
       mode: "LIVE",
       window: "5m",
       max: 1,
-      characteristics: ["fingerprint"],
+      characteristics: ["userId"],
     })
   );
 
   const req = await request();
-  const decision = await rateLimit.protect(req, { fingerprint });
+  const decision = await rateLimit.protect(req, { userId });
 
-  if (decision.isDenied()) {
+  if (decision.isDenied() && decision.reason.isRateLimit()) {
     throw new Error("Rate Limit Exceeded");
   }
 };
-// Server Action
+
+// Server Actions (Related to Bunny ) which can be passed as prop to client components
+
+// creating an videoObjectUrl so that we can upload a video to Bunny Stream Services
 export const getVideoUploadUrl = withErrorHandling(async () => {
-  await getSessionUserId();
+  await getUserSessionId();
   const videoResponse = await apiFetch<BunnyVideoResponse>(
     `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos`,
     {
@@ -77,6 +95,7 @@ export const getVideoUploadUrl = withErrorHandling(async () => {
   );
 
   const uploadUrl = `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoResponse.guid}`;
+  console.log(uploadUrl, videoResponse.guid);
 
   return {
     videoId: videoResponse.guid,
@@ -85,11 +104,13 @@ export const getVideoUploadUrl = withErrorHandling(async () => {
   };
 });
 
+// Creating an thumbnailObjectUrl so that we can upload a thumbnail to Bunny storage Services and serve via CDN
 export const getThumbnailUploadUrl = withErrorHandling(
   async (videoId: string) => {
     const fileName = `${Date.now()}-${videoId}-thumbnail`;
     const uploadUrl = `${THUMBNAIL_STORAGE_BASE_URL}/thumbnails/${fileName}`;
     const cdnUrl = `${THUMBNAIL_CDN_URL}/thumbnails/${fileName}`;
+    console.log();
 
     return {
       uploadUrl,
@@ -99,9 +120,10 @@ export const getThumbnailUploadUrl = withErrorHandling(
   }
 );
 
+//Only updating the video title and description using the same videoObject and then create a DB entry
 export const saveVideoDetails = withErrorHandling(
   async (videoDetails: VideoDetails) => {
-    const userId = await getSessionUserId();
+    const userId = await getUserSessionId();
     // applying rate limiting to video Upload
     await validateWithArcjet(userId);
 
@@ -125,9 +147,7 @@ export const saveVideoDetails = withErrorHandling(
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-
     reValidatePaths(["/"]);
-
     return {
       videoId: videoDetails.videoId,
     };
@@ -149,6 +169,7 @@ export const getAllVideosFromDb = withErrorHandling(
     const whereCondition = searchQuery.trim()
       ? and(userSeeVideoCondition, doesTitleMatch(videos, searchQuery))
       : userSeeVideoCondition;
+    // directly destructuring the property of the object which is the first element of the array
     const [{ totalCount }] = await db
       .select({ totalCount: sql<number>`count(*)` })
       .from(videos)
@@ -156,15 +177,19 @@ export const getAllVideosFromDb = withErrorHandling(
 
     const totalVideos = Number(totalCount || 0);
     const totalPages = Math.ceil(totalVideos / pageSize);
+    // Db call makes by SELECT query always return a array of objects even it returns a single row but same is not with INSERT,UPDATE ,DELETE
 
+    // Here videoRecords is an array of objects and each object is video data wit hvarious property, as we know SELECT query returns an array of object.
     const videoRecords = await buildVideoWithUserQuery()
       .where(whereCondition)
+      /* 1.You are writing the SQL manually inside a tagged template literal i.e sql`${videos.createdAt}DESC`
+         2.Works fine, but you have to handle spacing, casing, and SQL syntax yourself (DESC needs no space issues).
+         */
       .orderBy(
         sortFilter ? getOrderByClause(sortFilter) : sql`${videos.createdAt}DESC`
       )
       .limit(pageSize)
       .offset((pageNumber - 1) * pageSize);
-
     return {
       videos: videoRecords,
       pagination: {
@@ -177,6 +202,7 @@ export const getAllVideosFromDb = withErrorHandling(
   }
 );
 export const getVideoById = withErrorHandling(async (videoId: string) => {
+  // Destructuring the array first element so here videoRecord is a single video not an array
   const [videoRecord] = await buildVideoWithUserQuery().where(
     eq(videos.id, videoId)
   );
@@ -211,8 +237,23 @@ export const getAllVideosByUser = withErrorHandling(
       searchQuery.trim() && ilike(videos.title, `%${searchQuery}%`),
     ].filter(Boolean) as any[];
 
+    /* .filter() is a Javascript method used on arrays so it filter-out the elements from the array where we have truthy values only */
     const userVideos = await buildVideoWithUserQuery()
       .where(and(...conditions))
+      /* 
+       desc(videos.createdAt) → helper function provided by your ORM (probably Drizzle).
+
+       You don’t write raw SQL; the ORM generates the correct SQL for you.
+
+       Safer and cleaner:
+ 
+       1.Automatically handles spacing
+
+       2.Automatically prevents SQL injection
+
+       3.Easier to read and maintain
+      
+      */
       .orderBy(
         sortFilter ? getOrderByClause(sortFilter) : desc(videos.createdAt)
       );

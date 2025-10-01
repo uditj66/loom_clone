@@ -2,7 +2,11 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ilike, sql } from "drizzle-orm";
 import { videos } from "@/drizzle/schema";
-import { DEFAULT_VIDEO_CONFIG, DEFAULT_RECORDING_CONFIG } from "@/constants";
+import {
+  DEFAULT_VIDEO_CONFIG,
+  DEFAULT_RECORDING_CONFIG,
+  BUNNY,
+} from "@/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -37,9 +41,10 @@ export const getEnv = (key: string): string => {
 // API fetch helper with required Bunny CDN options
 export const apiFetch = async <T = Record<string, unknown>>(
   url: string,
-  options: Omit<ApiFetchOptions, "bunnyType"> & {
-    bunnyType: "stream" | "storage";
-  }
+  options: ApiFetchOptions
+  // options: Omit<ApiFetchOptions, "bunnyType"> & {
+  //   bunnyType: "stream" | "storage";
+  // }
 ): Promise<T> => {
   const {
     method = "GET",
@@ -60,7 +65,7 @@ export const apiFetch = async <T = Record<string, unknown>>(
     AccessKey: key,
     ...(bunnyType === "stream" && {
       accept: "application/json",
-      ...(body && { "content-type": "application/json" }),
+      ...(body && { "Content-Type": "application/json" }), // Only add header Content-Type ="application/json" when body is present
     }),
   };
 
@@ -73,9 +78,9 @@ export const apiFetch = async <T = Record<string, unknown>>(
   const response = await fetch(url, requestOptions);
 
   if (!response.ok) {
-    throw new Error(`API error ${response.text()}`);
+    const errorText = await response.text();
+    throw new Error(`API error: ${response.status} ${errorText}`);
   }
-
   if (method === "DELETE" || !expectJson) {
     return true as T;
   }
@@ -142,7 +147,7 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
   ];
 };
 
-//  SCREEN RECOEDING BASED FUNCTIONS
+//  SCREEN RECORDING BASED FUNCTIONS
 export const getMediaStreams = async (
   withMic: boolean
 ): Promise<MediaStreams> => {
@@ -302,10 +307,64 @@ export function daysAgo(inputDate: Date): string {
 }
 
 export const createIframeLink = (videoId: string) =>
-  `https://iframe.mediadelivery.net/embed/425465/${videoId}?autoplay=true&preload=true`;
+  `${BUNNY.EMBED_URL}/501899/${videoId}`;
 
 export const doesTitleMatch = (videos: any, searchQuery: string) =>
   ilike(
     sql`REPLACE(REPLACE(REPLACE(LOWER(${videos.title}), '-', ''), '.', ''), ' ', '')`,
     `%${searchQuery.replace(/[-. ]/g, "").toLowerCase()}%`
   );
+
+/*
+  ## ilike
+ilike is a case-insensitive SQL match (like LIKE in SQL but ignores case).
+
+% before and after the search query means it matches anywhere in the title.
+
+Example: %video% matches "myawesomevideo".
+
+  ## REPLACE
+  REPLACE(original_string, string_to_find, string_to_replace_with)
+
+  eg. REPLACE('Hello-World', '-', '') 
+  -- Result: 'HelloWorld'
+  => So in my code, multiple nested REPLACEs are used to remove -, ., and spaces inside the SQL query before matching.
+ 
+ ## LOWER
+ Converts the title to lowercase so "Video" and "video" are treated the same.
+ 
+ ## replace is a javascript string related function
+
+ 1️⃣ What sql is
+
+  In your code:
+
+  sql`REPLACE(LOWER(${videos.title}), '-', '')`
+
+  sql is just a helper that tells your library:
+ -> “Hey, the stuff inside the backticks is SQL code, not normal JavaScript.”
+ -> It tells the library: “This is raw SQL code; treat ${videos.title} safely as a SQL parameter”.
+ -> Basically, it helps build SQL queries dynamically without SQL injection.
+ -> Without sql, the library wouldn’t know how to safely send your query to the database.
+
+
+  2️⃣ Why we need it
+
+  You want to run a query like this in your database:
+
+   SELECT * FROM videos WHERE REPLACE(LOWER(title), '-', '') ILIKE '%search%'
+
+   ${videos.title} is dynamic (comes from your code), so you need a safe way to put it inside SQL.
+ 
+   sql wraps it so your library knows:
+ 
+   ->Treat it as SQL
+ 
+   ->Replace variables safely
+ 
+   ->Avoid SQL injection
+  
+  
+
+  
+  */

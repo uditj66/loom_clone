@@ -84,7 +84,7 @@ const page = () => {
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); /* prevent the page from reloading */
     setIsSubmitting(true);
     try {
@@ -97,7 +97,7 @@ const page = () => {
         return;
       }
 
-      // # Step-0 (get Upload Url)
+      // # Step-0 (get Access to VideoUpload Url)
       const {
         videoId,
         uploadUrl: videoUploadUrl,
@@ -111,7 +111,7 @@ const page = () => {
       // # Step-1 (upload  the video to bunny)
       await uploadFileToBunny(video.file, videoUploadUrl, videoAccessKey);
 
-      // # Step-2 (upload thumbnail to DB)
+      // # Step-2 ( get Access to ThumbnailUpload Url)
       const {
         uploadUrl: thumbnailUploadUrl,
         accessKey: thumbnailAccessKey,
@@ -130,13 +130,13 @@ const page = () => {
 
       //  Step-4 Create a  new DB entry for the video details(URLs , data)
       await saveVideoDetails({
+        ...formData,
         videoId,
         thumbnailUrl: thumbnailCdnUrl,
-        ...formData,
         duration: videoDuration,
       });
 
-      router.push(`/`);
+      router.push(`/video/${videoId}`);
     } catch (error) {
       console.error("Error submitting form :", error);
     } finally {
@@ -157,7 +157,7 @@ const page = () => {
           label="Title :"
           value={formData.title}
           onChange={handleInputChange}
-          placeholder="Enter a clear and concise title"
+          placeholder="Enter a clear and concise title."
         />
         <FormField
           id="description"
@@ -165,7 +165,7 @@ const page = () => {
           value={formData.description}
           as="textarea"
           onChange={handleInputChange}
-          placeholder="Describe What this video is About"
+          placeholder="Describe What this video is About."
         />
         <FileInput
           id="video"
@@ -202,7 +202,7 @@ const page = () => {
           onChange={handleInputChange}
         />
         <button className="submit-button" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Uploading" : "Upload a video"}
+          {isSubmitting ? "Uploading ..." : "Upload a video"}
         </button>
       </form>
     </div>

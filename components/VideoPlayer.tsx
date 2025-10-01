@@ -11,7 +11,7 @@ const VideoPlayer = ({ videoId }: VideoPlayerProps) => {
         title="videoPlayer"
         style={{ border: 0, zIndex: 50 }}
         allowFullScreen
-        allow="acclerometer;gyroscope:aotoplay;encrypted-media picture-in-picutre"
+        allow="acclerometer;gyroscope:autoplay;encrypted-media;picture-in-picutre"
       />
     </div>
   );

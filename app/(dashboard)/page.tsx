@@ -7,7 +7,6 @@ import React from "react";
 
 const Page = async ({ searchParams }: SearchParams) => {
   const { query, filter, page } = await searchParams;
-
   const { videos, pagination } = await getAllVideosFromDb(
     query,
     filter,
@@ -17,7 +16,7 @@ const Page = async ({ searchParams }: SearchParams) => {
     <main className="wrapper page">
       <Header title="ALL VIDEOS" subHeader="Public Library" />
       <h1 className="text-2xl font-karla">Welcome to LOOM clone</h1>
-
+      {/* videos is an array of objects and each object contain two keys which are video itself and the user who created it that's why we directly de-structure these properties from videos array */}
       {videos?.length > 0 ? (
         <section className="video-grid">
           {videos.map(({ video, user }) => (
