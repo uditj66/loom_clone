@@ -53,9 +53,10 @@ const page = () => {
         if (!storedVideo) return;
         const { url, name, type, duration } = JSON.parse(storedVideo);
         const blob = await fetch(url).then((res) => res.blob());
+        // Creating file from the recorded blob
         const file = new File([blob], name, { type, lastModified: Date.now() });
 
-        //  upload video programatiocally to the video upload form
+        //  Upload video programatically to the video upload form after recording it using screen recording feature
 
         if (video.inputRef.current) {
           const dataTransfer = new DataTransfer();
@@ -136,7 +137,7 @@ const page = () => {
         duration: videoDuration,
       });
 
-      router.push(`/video/${videoId}`);
+      router.push(`/`);
     } catch (error) {
       console.error("Error submitting form :", error);
     } finally {

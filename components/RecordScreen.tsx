@@ -54,6 +54,7 @@ const RecordScreen = () => {
     }
 
     router.push("/upload");
+    closeModal();
   };
   return (
     <div className="record">
@@ -105,7 +106,7 @@ const RecordScreen = () => {
               )}
 
               {isRecording && (
-                <button onClick={handleStart} className="record-start">
+                <button onClick={stopRecording} className="record-start">
                   {" "}
                   <Image
                     src={ICONS.record}
@@ -119,15 +120,17 @@ const RecordScreen = () => {
 
               {recordedVideoUrl && (
                 <>
-                  <button className="record-again">Record again</button>
+                  <button className="record-again" onClick={recordAgain}>
+                    Record again
+                  </button>
                   <button className="record-upload" onClick={goToUpload}>
-                    Continue to Upload
                     <Image
                       src={ICONS.upload}
                       alt="upload"
                       height={16}
                       width={16}
                     />
+                    Continue to Upload
                   </button>
                 </>
               )}

@@ -23,10 +23,10 @@ const VideoDetailHeader = ({
   };
   useEffect(() => {
     if (!copied) return;
-    setTimeout(() => {
+    const changeCheckIcon = setTimeout(() => {
       if (copied) setCopied(false);
     }, 1000);
-    // return () => clearTimeout(changeCheckIcon);
+    return () => clearTimeout(changeCheckIcon);
   }, [copied]);
 
   return (
