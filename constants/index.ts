@@ -13,9 +13,10 @@ export const emojis = ["😂", "😍", "👍"];
 
 export const filterOptions = [
   "Most Viewed",
+  "Least Viewed",
   "Most Recent",
   "Oldest First",
-  "Least Viewed",
+  "No Filter",
 ];
 
 export const visibilities: Visibility[] = ["public", "private"];
@@ -56,7 +57,7 @@ export const dummyCards = [
     userImg: "/assets/images/jason.png",
     username: "Jason",
     views: 10,
-    visibility:"public",
+    visibility: "public",
     duration: 156,
   },
   {

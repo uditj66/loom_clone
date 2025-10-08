@@ -1,5 +1,6 @@
 import EmptyState from "@/components/EmptyState";
 import Header from "@/components/Header";
+import Pagination from "@/components/Pagination";
 import VideoCard from "@/components/VideoCard";
 import { dummyCards } from "@/constants";
 import { getAllVideosFromDb } from "@/lib/actions/video";
@@ -10,7 +11,7 @@ const Page = async ({ searchParams }: SearchParams) => {
   const { videos, pagination } = await getAllVideosFromDb(
     query,
     filter,
-    Number(page)
+    Number(page) || 1
   );
   return (
     <main className="wrapper page">
@@ -47,6 +48,13 @@ const Page = async ({ searchParams }: SearchParams) => {
         visibility="public"
         duration={156}
       /> */}
+
+      {pagination?.totalPages > 1 && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+        />
+      )}
     </main>
   );
 };

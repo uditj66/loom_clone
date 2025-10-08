@@ -195,8 +195,6 @@ export const getAllVideosFromDb = withErrorHandling(
       pagination: {
         currentPage: pageNumber,
         totalPages,
-        totalVideos,
-        pageSize,
       },
     };
   }

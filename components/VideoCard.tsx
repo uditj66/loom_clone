@@ -22,7 +22,7 @@ const VideoCard = ({
         alt="thumbnail"
         width={290}
         height={160}
-      ></Image>
+      />
 
       <article>
         <div>

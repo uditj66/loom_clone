@@ -222,12 +222,6 @@ declare interface SharedHeaderProps {
   userImg?: string;
 }
 
-declare interface SharedHeaderProps {
-  subHeader: string;
-  title: string;
-  userImg?: string;
-}
-
 declare interface Params {
   params: Promise<Record<string, string>>;
 }
