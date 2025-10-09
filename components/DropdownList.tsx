@@ -32,7 +32,7 @@ const DropdownList = ({
               {option}
               {selectedOption === option && (
                 <Image
-                  src={"assets/icons/check.svg"}
+                  src={"/assets/icons/check.svg"}
                   alt="checkmark"
                   width={20}
                   height={20}

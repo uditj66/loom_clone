@@ -28,8 +28,8 @@ const Navbar = () => {
               <Image
                 src={user.image ?? "/assets/images/dummy.jpg"}
                 alt="userImage"
-                width={24}
-                height={24}
+                width={40}
+                height={40}
                 className="rounded-full"
               />
             </button>

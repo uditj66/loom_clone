@@ -26,7 +26,7 @@ const ACCESS_KEY = {
 };
 
 // Helper functions
-const getUserSessionId = async (): Promise<string> => {
+export const getUserSessionId = async (): Promise<string> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("UNAUTHENTICATED");
   return session.user.id;
@@ -41,8 +41,8 @@ const getUserSessionId = async (): Promise<string> => {
 3. This function is just a helper to revalidate multiple paths at once, instead of calling revalidatePath separately for each path.
 
 */
-const reValidatePaths = (paths: string[]) => {
-  paths.forEach((path) => revalidatePath(path));
+const revalidatePaths = (paths: string[]) => {
+  paths.forEach((path) => revalidatePath(path, "page"));
 };
 
 // This is helper function that just build a Query so that if we want to use this query again then we don't need to write again .We directly use this query object and await it ,to really make an Db call.
@@ -127,6 +127,7 @@ export const saveVideoDetails = withErrorHandling(
     // applying rate limiting to video Upload
     await validateWithArcjet(userId);
 
+    // Updating the temporary Video title and temporary Video description in Bunny cdn by attaching the  actual title and description given at the time of video upload form
     await apiFetch(
       `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoDetails.videoId}`,
       {
@@ -147,7 +148,7 @@ export const saveVideoDetails = withErrorHandling(
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    reValidatePaths(["/"]);
+    revalidatePaths(["/"]);
     return {
       videoId: videoDetails.videoId,
     };
@@ -179,7 +180,7 @@ export const getAllVideosFromDb = withErrorHandling(
     const totalPages = Math.ceil(totalVideos / pageSize);
     // Db call makes by SELECT query always return a array of objects even it returns a single row but same is not with INSERT,UPDATE ,DELETE
 
-    // Here videoRecords is an array of objects and each object is video data wit hvarious property, as we know SELECT query returns an array of object.
+    // Here videoRecords is an array of objects and each object is video data with various property, as we know SELECT query returns an array of object.
     const videoRecords = await buildVideoWithUserQuery()
       .where(whereCondition)
       /* 1.You are writing the SQL manually inside a tagged template literal i.e sql`${videos.createdAt}DESC`
@@ -257,5 +258,38 @@ export const getAllVideosByUser = withErrorHandling(
       );
 
     return { user: userInfo, videos: userVideos, count: userVideos.length };
+  }
+);
+
+export const deleteVideo = withErrorHandling(
+  async (videoId: string, thumbnailUrl: string) => {
+    await apiFetch(
+      `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
+
+      {
+        method: "DELETE",
+        bunnyType: "stream",
+      }
+    );
+    const thumbnailPath = thumbnailUrl.split("thumbnails/")[1];
+    await apiFetch(
+      `${THUMBNAIL_STORAGE_BASE_URL}/thumbnails/${thumbnailPath}`,
+      { method: "DELETE", bunnyType: "storage", expectJson: false }
+    );
+
+    await db.delete(videos).where(eq(videos.videoId, videoId));
+    revalidatePaths(["/", `/video/${videos.id}`, `/profile/${videos.userId}`]);
+    return;
+  }
+);
+
+export const updateVideoVisibility = withErrorHandling(
+  async (videoId: string, visibility: Visibility) => {
+    await db
+      .update(videos)
+      .set({ visibility: visibility, updatedAt: new Date() })
+      .where(eq(videos.videoId, videoId));
+
+    revalidatePaths(["/", `/videos/${videoId}`, `/profile/${videos.userId}`]);
   }
 );

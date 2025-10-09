@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const VideoCard = ({
   id,
@@ -14,6 +14,14 @@ const VideoCard = ({
   views,
   duration,
 }: VideoCardProps) => {
+  // Due to Hydration error If I use dateStyle property in SSR then HYDRATION ERROR occurs, So to tackle it I have to render date only after client mount if i want to use the datestyle property
+  const [formattedDate, setFormattedDate] = useState<string>("");
+  useEffect(() => {
+    const date = createdAt.toLocaleDateString("en-in", {
+      dateStyle: "full",
+    });
+    setFormattedDate(date);
+  });
   return (
     <Link href={`/video/${id}`} className="video-card">
       <Image
@@ -50,8 +58,9 @@ const VideoCard = ({
           </aside>
         </div>
         <h2>
-          {title}-{" "}
+          {title} |{" "}
           {createdAt.toLocaleDateString("en-IN", {
+            // dateStyle: "full", can't be used in SSR ,bcz hydration error occurs
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -59,6 +68,7 @@ const VideoCard = ({
             minute: "numeric",
             second: "numeric",
           })}
+          {/* | {formattedDate} */}
         </h2>
       </article>
       <button className="copy-btn">
