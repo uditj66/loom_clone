@@ -293,3 +293,36 @@ export const updateVideoVisibility = withErrorHandling(
     revalidatePaths(["/", `/videos/${videoId}`, `/profile/${videos.userId}`]);
   }
 );
+export const getTranscript = withErrorHandling(async (videoId: string) => {
+  const response = await fetch(
+    `${BUNNY.TRANSCRIPT_URL}/${videoId}/captions/en-auto.vtt`
+  );
+  return response.text();
+});
+
+export const incrementVideoViews = withErrorHandling(
+  async (videoId: string) => {
+    await db
+      .update(videos)
+      .set({ views: sql`${videos.views} + 1`, updatedAt: new Date() })
+      .where(eq(videos.videoId, videoId));
+
+    revalidatePaths([`/video/${videoId}`]);
+    return {};
+  }
+);
+export const getVideoProcessingStatus = withErrorHandling(
+  async (videoId: string) => {
+    const processingInfo = await apiFetch<BunnyVideoResponse>(
+      `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
+      { bunnyType: "stream" }
+    );
+
+    return {
+      isProcessed: processingInfo.status === 4,
+      encodingProgress: processingInfo.encodeProgress || 0,
+      status: processingInfo.status,
+    };
+  }
+);
+

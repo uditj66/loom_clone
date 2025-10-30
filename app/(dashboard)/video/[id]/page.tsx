@@ -1,14 +1,16 @@
 import VideoDetailHeader from "@/components/VideoDetailHeader";
+import VideoInfo from "@/components/VideoInfo";
 import VideoPlayer from "@/components/VideoPlayer";
-import { getVideoById } from "@/lib/actions/video";
+import { getTranscript, getVideoById } from "@/lib/actions/video";
 import { redirect } from "next/navigation";
-import React from "react";
-
 const page = async ({ params }: Params) => {
   const { id } = await params;
-  const { user, video } = await getVideoById(id);
-  if (!video) redirect("/404");
-
+  const result = await getVideoById(id);
+  if (!result || !result.video) {
+    redirect("/404"); // or handle error
+  }
+  const { user, video } = result;
+  const transcript = await getTranscript(id);
   return (
     <div className="wrapper page">
       <VideoDetailHeader
@@ -23,6 +25,16 @@ const page = async ({ params }: Params) => {
         <div className="content">
           <VideoPlayer videoId={video.videoId} />
         </div>
+
+        <VideoInfo
+          title={video.title}
+          description={video.description}
+          createdAt={video.createdAt}
+          transcript={transcript}
+          videoId={video.videoId}
+          videoUrl={video.videoUrl}
+          key={video.id}
+        />
       </section>
     </div>
   );

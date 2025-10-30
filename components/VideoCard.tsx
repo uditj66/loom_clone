@@ -1,7 +1,7 @@
-"use client";
+// "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
 
 const VideoCard = ({
   id,
@@ -14,7 +14,8 @@ const VideoCard = ({
   views,
   duration,
 }: VideoCardProps) => {
-  // Due to Hydration error If I use dateStyle property in SSR then HYDRATION ERROR occurs, So to tackle it I have to render date only after client mount if i want to use the datestyle property
+  /* To Stop Server-Side Pre-rendering and want to use datestyle property without getting hydration error I have to use use-client directive and then ,I have to use useEffect and useState to make it purely client component to prevents any hydration errors.
+
   const [formattedDate, setFormattedDate] = useState<string>("");
   useEffect(() => {
     const date = createdAt.toLocaleDateString("en-in", {
@@ -22,6 +23,7 @@ const VideoCard = ({
     });
     setFormattedDate(date);
   });
+  */
   return (
     <Link href={`/video/${id}`} className="video-card">
       <Image
@@ -60,13 +62,13 @@ const VideoCard = ({
         <h2>
           {title} |{" "}
           {createdAt.toLocaleDateString("en-IN", {
-            // dateStyle: "full", can't be used in SSR ,bcz hydration error occurs
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            second: "numeric",
+            dateStyle: "full", //Currently this Component is purely a server-side so no hydration error occurs and code works fine and date format is according to server format.But if i make it client-side Component using"use-client" directive and then use the datestyle property.Then i will face the hydration error and i will need to prevent the sever-side pre-rendering a feature exclusive to client-side Component.When the Component doesn't need any interactivity like click or event-listners ,or is not dependent on browser for any feature, server-sode pre-rendering occurs.To prevent server side pre-rendering i will make this component a purely clinet side by using useState or useEffect-hook as these are client-side utilities.
+            // year: "numeric",
+            // month: "long",
+            // day: "numeric",
+            // hour: "numeric",
+            // minute: "numeric",
+            // second: "numeric",
           })}
           {/* | {formattedDate} */}
         </h2>
