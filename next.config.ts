@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: "snapcast-main.b-cdn.net",
+        hostname: "snapcast2.b-cdn.net",
         protocol: "https",
         port: "",
         pathname: "/**",
